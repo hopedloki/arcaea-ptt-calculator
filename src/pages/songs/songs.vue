@@ -13,22 +13,7 @@
       </view>
       
       <view class="filter-row">
-        <view class="filter-item">
-          <text class="filter-label">难度筛选</text>
-          <picker 
-            :range="difficultyOptions" 
-            range-key="name"
-            :value="difficultyIndex"
-            @change="onDifficultyChange"
-            class="picker"
-          >
-            <view class="picker-text">
-              {{ difficultyOptions[difficultyIndex].name }}
-            </view>
-          </picker>
-        </view>
-        
-        <view class="filter-item">
+        <view class="filter-item full-width">
           <text class="filter-label">定数范围</text>
           <picker 
             :range="constantRangeOptions" 
@@ -99,26 +84,17 @@ const fromPage = ref('')
 // 搜索文本
 const searchText = ref('')
 
-// 筛选选项
-const difficultyOptions = [
-  { name: '全部难度', value: 'all' },
-  { name: '有PAST', value: 'pst' },
-  { name: '有PRESENT', value: 'prs' },
-  { name: '有FUTURE', value: 'ftr' },
-  { name: '有BEYOND', value: 'byd' },
-  { name: '有ETERNAL', value: 'etr' }
-]
-const difficultyIndex = ref(0)
-
-const constantRangeOptions = [
-  { name: '全部定数', min: 0, max: 20 },
-  { name: '1-3', min: 1, max: 3 },
-  { name: '3-5', min: 3, max: 5 },
-  { name: '5-7', min: 5, max: 7 },
-  { name: '7-9', min: 7, max: 9 },
-  { name: '9-11', min: 9, max: 11 },
-  { name: '11-13', min: 11, max: 13 }
-]
+// 筛选选项 - 定数值（精度0.1）
+const generateConstantRangeOptions = () => {
+  const options = [{ name: '全部定数', value: null }]
+  // 从1.0开始，到12.0结束，每0.1一个值
+  for (let i = 10; i <= 120; i++) {
+    const value = i / 10
+    options.push({ name: value.toFixed(1), value })
+  }
+  return options
+}
+const constantRangeOptions = generateConstantRangeOptions()
 const constantRangeIndex = ref(0)
 
 // 歌曲数据
@@ -127,39 +103,30 @@ const songsData = ref<any[]>([])
 // 筛选后的歌曲
 const filteredSongs = computed(() => {
   let filtered = [...songsData.value]
-  
+
   // 文本搜索
   if (searchText.value.trim()) {
     const searchLower = searchText.value.toLowerCase()
-    filtered = filtered.filter(song => 
+    filtered = filtered.filter(song =>
       song.name.toLowerCase().includes(searchLower) ||
       (song.artist && song.artist.toLowerCase().includes(searchLower))
     )
   }
-  
-  // 难度筛选
-  if (difficultyOptions[difficultyIndex.value].value !== 'all') {
-    const requiredDifficulty = difficultyOptions[difficultyIndex.value].value
-    filtered = filtered.filter(song => 
-      song[requiredDifficulty] !== null && song[requiredDifficulty] !== undefined
-    )
-  }
-  
-  // 定数范围筛选
-  const range = constantRangeOptions[constantRangeIndex.value]
-  if (range.min > 0 || range.max < 20) {
+
+  // 定数值筛选（精确匹配0.1精度）
+  const selectedConstant = constantRangeOptions[constantRangeIndex.value].value
+  if (selectedConstant !== null) {
     filtered = filtered.filter(song => {
       const difficulties = ['pst', 'prs', 'ftr', 'byd', 'etr']
       return difficulties.some(diff => {
         const constant = song[diff]
-        return constant !== null && 
-               constant !== undefined && 
-               constant >= range.min && 
-               constant < range.max
+        return constant !== null &&
+               constant !== undefined &&
+               Math.abs(constant - selectedConstant) < 0.001
       })
     })
   }
-  
+
   return filtered
 })
 
@@ -234,11 +201,6 @@ const search = () => {
   console.log('搜索歌曲:', searchText.value)
 }
 
-// 难度选择变化
-const onDifficultyChange = (e: any) => {
-  difficultyIndex.value = e.detail.value
-}
-
 // 定数范围选择变化
 const onConstantRangeChange = (e: any) => {
   constantRangeIndex.value = e.detail.value
@@ -247,7 +209,6 @@ const onConstantRangeChange = (e: any) => {
 // 重置筛选条件
 const resetFilters = () => {
   searchText.value = ''
-  difficultyIndex.value = 0
   constantRangeIndex.value = 0
 }
 
@@ -399,6 +360,10 @@ const getDifficultyClass = (difficulty: string): string => {
 
 .filter-item {
   flex: 1;
+}
+
+.filter-item.full-width {
+  width: 100%;
 }
 
 .filter-label {

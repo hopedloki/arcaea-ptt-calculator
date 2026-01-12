@@ -377,14 +377,14 @@
             <text class="result-value">{{ result.minScore.toLocaleString() }}</text>
           </view>
         </view>
-        <view class="result-item highlight" v-if="toleranceMode === 'current' || toleranceDisplayMode === 'far'">
+        <view class="result-item highlight" v-if="result.canAchieve && (toleranceMode === 'current' || toleranceDisplayMode === 'far')">
           <view class="result-icon">⚡</view>
           <view class="result-content">
             <text class="result-label">{{ toleranceMode === 'current' ? '最大Far数量' : '可容错Far数' }}</text>
             <text class="result-value highlight">{{ result.maxFarCount }}</text>
           </view>
         </view>
-        <view class="result-item" v-if="toleranceMode === 'current' || toleranceDisplayMode === 'lost'">
+        <view class="result-item" v-if="result.canAchieve && (toleranceMode === 'current' || toleranceDisplayMode === 'lost')">
           <view class="result-icon">💔</view>
           <view class="result-content">
             <text class="result-label">{{ toleranceMode === 'current' ? '最大Lost数量' : '可容错Lost数' }}</text>
@@ -397,6 +397,24 @@
             <text class="result-label">是否达成</text>
             <text class="result-value" :class="result.canAchieve ? 'success' : 'failed'">
               {{ result.canAchieve ? '已达成' : '未达成' }}
+            </text>
+          </view>
+        </view>
+        <view class="result-item warning" v-if="toleranceMode === 'current' && !result.canAchieve">
+          <view class="result-icon">⚠️</view>
+          <view class="result-content">
+            <text class="result-label">提示</text>
+            <text class="result-value warning-text">
+              当前判定数已无法达成目标
+            </text>
+          </view>
+        </view>
+        <view class="result-item warning" v-if="toleranceMode === 'current' && !result.canAchieve && result.theoreticalMaxScore">
+          <view class="result-icon">⚠️</view>
+          <view class="result-content">
+            <text class="result-label">理论最高分</text>
+            <text class="result-value warning-text">
+              {{ Math.round(result.theoreticalMaxScore).toLocaleString() }}分
             </text>
           </view>
         </view>
@@ -432,14 +450,14 @@
             <text class="result-value highlight">{{ Math.abs(result.scoreGap).toLocaleString() }}</text>
           </view>
         </view>
-        <view class="result-item highlight" v-if="toleranceMode === 'current' || toleranceDisplayMode === 'far'">
+        <view class="result-item highlight" v-if="result.canAchieve && (toleranceMode === 'current' || toleranceDisplayMode === 'far')">
           <view class="result-icon">⚡</view>
           <view class="result-content">
             <text class="result-label">{{ toleranceMode === 'current' ? '可Far数量' : '可容错Far数' }}</text>
             <text class="result-value highlight">{{ result.tolerableFar }}</text>
           </view>
         </view>
-        <view class="result-item" v-if="toleranceMode === 'current' || toleranceDisplayMode === 'lost'">
+        <view class="result-item" v-if="result.canAchieve && (toleranceMode === 'current' || toleranceDisplayMode === 'lost')">
           <view class="result-icon">💔</view>
           <view class="result-content">
             <text class="result-label">{{ toleranceMode === 'current' ? '可Lost数量' : '可容错Lost数' }}</text>
@@ -452,6 +470,24 @@
             <text class="result-label">是否达成</text>
             <text class="result-value" :class="result.canAchieve ? 'success' : 'failed'">
               {{ result.canAchieve ? '已达成' : '未达成' }}
+            </text>
+          </view>
+        </view>
+        <view class="result-item warning" v-if="toleranceMode === 'current' && !result.canAchieve">
+          <view class="result-icon">⚠️</view>
+          <view class="result-content">
+            <text class="result-label">提示</text>
+            <text class="result-value warning-text">
+              当前判定数已无法达成目标
+            </text>
+          </view>
+        </view>
+        <view class="result-item warning" v-if="toleranceMode === 'current' && !result.canAchieve && result.theoreticalMaxScore">
+          <view class="result-icon">⚠️</view>
+          <view class="result-content">
+            <text class="result-label">理论最高分</text>
+            <text class="result-value warning-text">
+              {{ Math.round(result.theoreticalMaxScore).toLocaleString() }}分
             </text>
           </view>
         </view>
@@ -487,14 +523,14 @@
             <text class="result-value highlight">{{ Math.abs(result.pttGap).toFixed(2) }}</text>
           </view>
         </view>
-        <view class="result-item highlight" v-if="toleranceMode === 'current' || toleranceDisplayMode === 'far'">
+        <view class="result-item highlight" v-if="result.canAchieve && (toleranceMode === 'current' || toleranceDisplayMode === 'far')">
           <view class="result-icon">⚡</view>
           <view class="result-content">
             <text class="result-label">{{ toleranceMode === 'current' ? '可Far数量' : '可容错Far数' }}</text>
             <text class="result-value highlight">{{ result.tolerableFar }}</text>
           </view>
         </view>
-        <view class="result-item" v-if="toleranceMode === 'current' || toleranceDisplayMode === 'lost'">
+        <view class="result-item" v-if="result.canAchieve && (toleranceMode === 'current' || toleranceDisplayMode === 'lost')">
           <view class="result-icon">💔</view>
           <view class="result-content">
             <text class="result-label">{{ toleranceMode === 'current' ? '可Lost数量' : '可容错Lost数' }}</text>
@@ -507,6 +543,24 @@
             <text class="result-label">是否达成</text>
             <text class="result-value" :class="result.canAchieve ? 'success' : 'failed'">
               {{ result.canAchieve ? '已达成' : '未达成' }}
+            </text>
+          </view>
+        </view>
+        <view class="result-item warning" v-if="toleranceMode === 'current' && !result.canAchieve">
+          <view class="result-icon">⚠️</view>
+          <view class="result-content">
+            <text class="result-label">提示</text>
+            <text class="result-value warning-text">
+              当前判定数已无法达成目标
+            </text>
+          </view>
+        </view>
+        <view class="result-item warning" v-if="toleranceMode === 'current' && !result.canAchieve && result.theoreticalMaxScore">
+          <view class="result-icon">⚠️</view>
+          <view class="result-content">
+            <text class="result-label">理论最高分</text>
+            <text class="result-value warning-text">
+              {{ Math.round(result.theoreticalMaxScore).toLocaleString() }}分
             </text>
           </view>
         </view>
@@ -557,8 +611,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { onPageShow } from '@dcloudio/uni-app'
-import { getNotesBySongName } from '@/utils/songs-database'
-import { songIdMap } from '@/utils/song-id-map'
+// getNotesBySongName 已删除，不再使用
+// song-id-map 已删除，不再使用
 
 // 容错模式
 const mode = ref<'rating' | 'score' | 'ptt'>('rating')
@@ -644,28 +698,7 @@ onMounted(() => {
   // 监听歌曲选择事件
   uni.$on('songSelected', (selectedSongData: any) => {
     selectedSong.value = selectedSongData
-    
     console.log('收到歌曲选择事件:', selectedSongData)
-    
-    // 自动填充物量信息
-    if (selectedSongData.name && selectedSongData.difficulty) {
-      const songId = songIdMap[selectedSongData.name]
-      console.log(`歌曲ID映射: "${selectedSongData.name}" -> "${songId}"`)
-      
-      const notesCount = getNotesBySongName(
-        selectedSongData.name, 
-        selectedSongData.difficulty, 
-        songIdMap
-      )
-      
-      if (notesCount) {
-        totalNotes.value = notesCount.toString()
-        console.log(`自动填充物量: ${selectedSongData.name} (${selectedSongData.difficulty}) = ${notesCount}`)
-      } else {
-        console.log(`未找到歌曲物量信息: ${selectedSongData.name} (${selectedSongData.difficulty})`)
-        console.log('可用的歌曲ID列表:', Object.keys(songIdMap).slice(0, 10))
-      }
-    }
   })
 })
 
@@ -682,27 +715,6 @@ onPageShow(() => {
         selectedSong.value.difficulty !== recentSong.difficulty) {
       selectedSong.value = recentSong
       console.log('页面显示时更新了选中的歌曲:', recentSong)
-      
-      // 自动填充物量信息
-      if (recentSong.name && recentSong.difficulty) {
-        const songId = songIdMap[recentSong.name]
-        console.log(`歌曲ID映射: "${recentSong.name}" -> "${songId}"`)
-        console.log('songIdMap中的前10个:', Object.keys(songIdMap).slice(0, 10))
-        
-        const notesCount = getNotesBySongName(
-          recentSong.name, 
-          recentSong.difficulty, 
-          songIdMap
-        )
-        
-        if (notesCount) {
-          totalNotes.value = notesCount.toString()
-          console.log(`自动填充物量: ${recentSong.name} (${recentSong.difficulty}) = ${notesCount}`)
-        } else {
-          console.log(`未找到歌曲物量信息: ${recentSong.name} (${recentSong.difficulty})`)
-          console.log('检查songIdMap:', recentSong.name in songIdMap)
-        }
-      }
     }
   }
 })
@@ -810,14 +822,19 @@ const calculate = () => {
       const maxPossibleScore = currentScore + remainingNotes * baseScorePerNote
       
       if (maxPossibleScore < targetScore) {
-        // 即使剩余Note全P也无法达成目标，容错为0
+        // 即使剩余Note全P也无法达成目标
+        // 计算理论最高分数（剩余判定全为大Pure）
+        const theoreticalMaxScore = currentScore + remainingNotes * baseScorePerNote + remainingNotes
+
         result.value = {
           minScore: targetScore,
-          maxScore: currentScore,
+          maxScore: theoreticalMaxScore,
+          currentScore,
           maxFarCount: far,
           maxLostCount: lost,
-          currentScore,
-          canAchieve: false
+          canAchieve: false,
+          remainingNotes,
+          theoreticalMaxScore
         }
       } else {
         // 剩余Note全P可以达成目标，计算具体容错数
@@ -888,14 +905,19 @@ const calculate = () => {
       const maxPossibleScore = currentScore + remainingNotes * baseScorePerNote
       
       if (maxPossibleScore < target) {
-        // 即使剩余Note全P也无法达成目标，容错为当前值
+        // 即使剩余Note全P也无法达成目标
+        // 计算理论最高分数（剩余判定全为大Pure）
+        const theoreticalMaxScore = currentScore + remainingNotes * baseScorePerNote + remainingNotes
+
         result.value = {
           targetScore: target,
           currentScore,
           scoreGap,
+          theoreticalMaxScore,
           tolerableFar: far,
           tolerableLost: lost,
-          canAchieve: false
+          canAchieve: false,
+          remainingNotes
         }
       } else {
         // 剩余Note全P可以达成目标，计算具体容错数
@@ -995,14 +1017,32 @@ const calculate = () => {
       const maxPossibleScore = currentScore + remainingNotes * baseScorePerNote
       
       if (maxPossibleScore < targetScore) {
-        // 即使剩余Note全P也无法达成目标，容错为当前值
+        // 即使剩余Note全P也无法达成目标
+        // 计算理论最高分数（剩余判定全为大Pure）
+        const theoreticalMaxScore = currentScore + remainingNotes * baseScorePerNote + remainingNotes
+
+        // 计算理论最高PTT
+        let theoreticalMaxPtt: number
+        if (theoreticalMaxScore >= 10000000) {
+          theoreticalMaxPtt = constant + 2.0
+        } else if (theoreticalMaxScore >= 9900000) {
+          theoreticalMaxPtt = constant + 1.5 + (theoreticalMaxScore - 9900000) / 100000
+        } else if (theoreticalMaxScore >= 9800000) {
+          theoreticalMaxPtt = constant + 1.0 + (theoreticalMaxScore - 9800000) / 400000
+        } else {
+          theoreticalMaxPtt = constant + Math.max(0, (theoreticalMaxScore - 9500000) / 300000)
+        }
+
         result.value = {
           targetPtt: target,
           currentPtt,
           pttGap: currentPtt - target,
+          theoreticalMaxScore,
+          theoreticalMaxPtt,
           tolerableFar: far,
           tolerableLost: lost,
-          canAchieve: false
+          canAchieve: false,
+          remainingNotes
         }
       } else {
         // 剩余Note全P可以达成目标，计算具体容错数
@@ -1489,6 +1529,17 @@ const getDifficultyText = (difficulty: string): string => {
 
 .result-value.failed {
   color: #f44336;
+  font-weight: bold;
+}
+
+.result-item.warning {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+  border: 2rpx solid #ffc107;
+}
+
+.result-value.warning-text {
+  color: #856404;
+  font-size: 32rpx;
   font-weight: bold;
 }
 

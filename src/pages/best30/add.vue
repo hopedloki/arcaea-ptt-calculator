@@ -121,7 +121,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onShow } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { onPageShow } from '@dcloudio/uni-app'
 
 // 是否为编辑模式
 const isEditing = ref(false)
@@ -180,13 +181,13 @@ onMounted(() => {
 })
 
 // 页面显示时检查是否有新选择的歌曲
-onShow(() => {
+onPageShow(() => {
   // 检查是否有新选择的歌曲
   const recentSong = uni.getStorageSync('recent_song')
   if (recentSong) {
     // 检查是否与当前选中的歌曲不同
-    if (!selectedSong.value.name || 
-        selectedSong.value.name !== recentSong.name || 
+    if (!selectedSong.value.name ||
+        selectedSong.value.name !== recentSong.name ||
         selectedSong.value.difficulty !== recentSong.difficulty) {
       selectedSong.value = recentSong
       calculatePttAndRating() // 重新计算PTT和评级

@@ -328,8 +328,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { onPageShow } from '@dcloudio/uni-app'
-import { getNotesBySongName } from '@/utils/songs-database'
-import { songIdMap } from '@/utils/song-id-map'
 
 // 转换模式
 const mode = ref<'scoreToPtt' | 'pttToScore'>('scoreToPtt')
@@ -376,19 +374,6 @@ onPageShow(() => {
         selectedSong.value.difficulty !== recentSong.difficulty) {
       selectedSong.value = recentSong
       console.log('页面显示时更新了选中的歌曲:', recentSong)
-      
-      // 自动填充物量信息（如果需要）
-      if (recentSong.name && recentSong.difficulty) {
-        const notesCount = getNotesBySongName(
-          recentSong.name, 
-          recentSong.difficulty, 
-          songIdMap
-        )
-        
-        if (notesCount) {
-          console.log(`物量信息: ${recentSong.name} (${recentSong.difficulty}) = ${notesCount}`)
-        }
-      }
     }
   }
 })
@@ -440,19 +425,6 @@ onMounted(() => {
     result.value = null
     scoreInput.value = ''
     pttInput.value = ''
-    
-    // 自动填充物量信息（如果需要）
-    if (song.name && song.difficulty) {
-      const notesCount = getNotesBySongName(
-        song.name, 
-        song.difficulty, 
-        songIdMap
-      )
-      
-      if (notesCount) {
-        console.log(`物量信息: ${song.name} (${song.difficulty}) = ${notesCount}`)
-      }
-    }
   })
 })
 
@@ -470,6 +442,11 @@ const switchInputMode = (newMode: 'song' | 'manual') => {
   result.value = null
   scoreInput.value = ''
   pttInput.value = ''
+
+  // 切换到手动输入模式时，清空选中的歌曲
+  if (newMode === 'manual') {
+    selectedSong.value = {}
+  }
 }
 
 // 定数输入变化
