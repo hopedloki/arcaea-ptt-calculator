@@ -471,20 +471,55 @@ const importData = () => {
 // 导出数据
 const exportData = () => {
   try {
+    // 按PTT从高到低排序，确定B几排名
+    const sortedRecords = [...best30Records.value]
+      .map((record, index) => {
+        // 在原始数组中找到记录的真实索引作为备用
+        const originalIndex = best30Records.value.findIndex(
+          r => r.songName === record.songName && r.difficulty === record.difficulty
+        )
+        
+        // 如果能找到真实索引，使用它，否则使用排序后的索引+1
+        const rank = originalIndex !== -1 ? originalIndex + 1 : index + 1
+        
+        return {
+          rank: rank,  // B几排名
+          songName: record.songName,
+          difficulty: record.difficulty,
+          constant: record.constant,
+          score: record.score,
+          rating: record.rating,
+          ptt: record.ptt,
+          // 判定详情（如果存在）
+          pureCount: record.pureCount !== undefined ? record.pureCount : null,
+          farCount: record.farCount !== undefined ? record.farCount : null,
+          lostCount: record.lostCount !== undefined ? record.lostCount : null,
+          remark: record.remark || null,
+          createdAt: record.createdAt || null
+        }
+      })
+    
     const data = {
-      best30Records: best30Records.value,
-      pttData: {
+      version: '2.0.0',
+      exportTime: new Date().toISOString(),
+      exportTimestamp: Date.now(),
+      playerPTT: {
         currentPTT: currentPTT.value,
         best10Avg: best10Avg.value,
         best30Avg: best30Avg.value,
-        recent10Avg: recent10Avg.value
+        recent10Avg: recent10Avg.value,
+        totalRecords: best30Records.value.length
       },
-      exportTime: new Date().toISOString(),
-      version: '1.0.0'
+      best30Records: sortedRecords,
+      metadata: {
+        appName: 'Arcaea PTT计算器',
+        appVersion: '1.2.5',
+        exportType: 'B30全量导出'
+      }
     }
     
     const jsonStr = JSON.stringify(data, null, 2)
-    const fileName = `arcaea-ptt-backup-${Date.now()}.json`
+    const fileName = `arcaea-b30-export-${new Date().toISOString().slice(0, 10)}.json`
     
     // #ifdef H5
     // 在H5环境下直接创建下载链接
