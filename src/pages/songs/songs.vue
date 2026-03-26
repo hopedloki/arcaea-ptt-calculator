@@ -14,6 +14,22 @@
       
       <view class="filter-row">
         <view class="filter-item full-width">
+          <text class="filter-label">曲包</text>
+          <picker 
+            :range="packOptions" 
+            :value="packIndex"
+            @change="onPackChange"
+            class="picker"
+          >
+            <view class="picker-text">
+              {{ packOptions[packIndex] }}
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="filter-row">
+        <view class="filter-item full-width">
           <text class="filter-label">定数范围</text>
           <picker 
             :range="constantRangeOptions" 
@@ -101,9 +117,22 @@ const constantRangeIndex = ref(0)
 // 歌曲数据
 const songsData = ref<any[]>([])
 
+// 曲包选项
+const packOptions = ref<string[]>(['全部曲包'])
+const packIndex = ref(0)
+
 // 筛选后的歌曲
 const filteredSongs = computed(() => {
   let filtered = [...songsData.value]
+
+  // 曲包筛选
+  if (packIndex.value > 0) {
+    const selectedPack = packOptions.value[packIndex.value]
+    filtered = filtered.filter(song =>
+      song.pack === selectedPack ||
+      song.pack.toLowerCase() === selectedPack.toLowerCase()
+    )
+  }
 
   // 文本搜索
   if (searchText.value.trim()) {
@@ -153,7 +182,7 @@ const loadSongs = async () => {
   try {
     // 从本地存储加载歌曲数据
     const localSongs = loadSongsDataFromStorage()
-    
+
     if (localSongs && localSongs.length > 0) {
       // 检查本地存储的歌曲数量是否完整（新数据应该有1000+首）
       if (localSongs.length < 800) {
@@ -161,6 +190,8 @@ const loadSongs = async () => {
         await loadCompleteSongsData()
       } else {
         songsData.value = localSongs
+        // 提取曲包列表
+        extractPackList(localSongs)
         console.log('从本地存储加载歌曲数据，共', localSongs.length, '首歌曲')
       }
     } else {
@@ -181,6 +212,8 @@ const loadCompleteSongsData = async () => {
   try {
     const songsArray = await fetchSongsFromAPI()
     songsData.value = songsArray
+    // 提取所有曲包列表（去重）
+    extractPackList(songsArray)
     // 保存到本地存储
     try {
       uni.setStorageSync('songs_data', songsArray)
@@ -191,6 +224,19 @@ const loadCompleteSongsData = async () => {
   } catch (e) {
     console.error('加载歌曲常量失败:', e)
   }
+}
+
+// 提取所有曲包列表（去重）
+const extractPackList = (songs: any[]) => {
+  const packSet = new Set<string>()
+  songs.forEach(song => {
+    if (song.pack) {
+      packSet.add(song.pack)
+    }
+  })
+  const packArray = Array.from(packSet).sort()
+  packOptions.value = ['全部曲包', ...packArray]
+  console.log('提取曲包列表成功，共', packArray.length, '个曲包')
 }
 
 
@@ -211,9 +257,15 @@ const onConstantRangeChange = (e: any) => {
   constantRangeIndex.value = e.detail.value
 }
 
+// 曲包选择变化
+const onPackChange = (e: any) => {
+  packIndex.value = e.detail.value
+}
+
 // 重置筛选条件
 const resetFilters = () => {
   searchText.value = ''
+  packIndex.value = 0
   constantRangeIndex.value = 0
 }
 
