@@ -238,32 +238,38 @@ const getAvailableDifficulties = (song: any) => {
   return available
 }
 
-// 选择歌曲
+// 选择歌曲（显示详情）
 const selectSong = (song: any) => {
-  // 默认选择FTR难度（如果有）
-  const difficulty = song.ftr !== null && song.ftr !== undefined ? 'ftr' : 
-                    song.prs !== null && song.prs !== undefined ? 'prs' : 
-                    song.pst !== null && song.pst !== undefined ? 'pst' : ''
-  
-  if (difficulty) {
-    selectSongWithDifficulty(song, difficulty)
-  }
+  // 跳转到歌曲详情页面
+  uni.navigateTo({
+    url: `/pages/songs/song-detail?songId=${song.id}`
+  })
 }
 
-// 选择特定难度的歌曲
+// 选择特定难度的歌曲（直接跳转到容错计算）
 const selectSongWithDifficulty = (song: any, difficulty: string) => {
-  const selectedSong = {
+  // 转换为SimpleSongData格式
+  const simpleSong = {
+    id: song.id,
     name: song.name,
     artist: song.artist,
-    difficulty,
-    constant: song[difficulty]
+    pack: song.pack,
+    dl: song.dl,
+    alias: song.alias || [],
+    [difficulty]: song[difficulty],
+    [`${difficulty}Notes`]: song[`${difficulty}Notes`]
   }
   
-  // 保存最近选择的歌曲
-  uni.setStorageSync('recent_song', selectedSong)
+  // 保存到本地存储
+  uni.setStorageSync('selected_song_for_tolerance', {
+    song: simpleSong,
+    difficulty: difficulty
+  })
   
-  // 返回来源页面
-  navigateBackToSource(selectedSong)
+  // 跳转到容错计算页面
+  uni.navigateTo({
+    url: '/pages/calculator/tolerance?from=songs'
+  })
 }
 
 // 返回来源页面

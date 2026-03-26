@@ -49,6 +49,14 @@
 			}
 		},
 		{
+			"path": "pages/songs/song-detail",
+			"style": {
+				"navigationBarTitleText": "歌曲详情",
+				"navigationBarBackgroundColor": "#4f46e5",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/data/data",
 			"style": {
 				"navigationBarTitleText": "数据管理",

@@ -610,7 +610,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { onPageShow } from '@dcloudio/uni-app'
+import { onPageShow, onLoad } from '@dcloudio/uni-app'
 // getNotesBySongName 已删除，不再使用
 // song-id-map 已删除，不再使用
 
@@ -700,6 +700,63 @@ onMounted(() => {
     selectedSong.value = selectedSongData
     console.log('收到歌曲选择事件:', selectedSongData)
   })
+})
+
+// 页面加载时检查是否有从歌曲详情传来的数据
+onLoad((options: any) => {
+  if (options && options.from === 'songDetail') {
+    // 从歌曲详情页面跳转过来
+    const selectedSongForTolerance = uni.getStorageSync('selected_song_for_tolerance')
+    if (selectedSongForTolerance && selectedSongForTolerance.song && selectedSongForTolerance.difficulty) {
+      const { song, difficulty } = selectedSongForTolerance
+      
+      // 更新选中的歌曲信息
+      selectedSong.value = {
+        name: song.name,
+        artist: song.artist,
+        difficulty: difficulty,
+        constant: song[difficulty]
+      }
+      
+      // 获取物量
+      const notesKey = `${difficulty}Notes`
+      const notes = song[notesKey]
+      if (notes && notes > 0) {
+        totalNotes.value = notes.toString()
+        
+        // 自动填写Pure数量为物量
+        pureCount.value = notes.toString()
+        
+        console.log(`从歌曲详情加载: ${song.name} [${difficulty.toUpperCase()}] 物量: ${notes}`)
+      }
+    }
+  } else if (options && options.from === 'songs') {
+    // 从歌曲列表直接点击难度跳转过来
+    const selectedSongForTolerance = uni.getStorageSync('selected_song_for_tolerance')
+    if (selectedSongForTolerance && selectedSongForTolerance.song && selectedSongForTolerance.difficulty) {
+      const { song, difficulty } = selectedSongForTolerance
+      
+      // 更新选中的歌曲信息
+      selectedSong.value = {
+        name: song.name,
+        artist: song.artist,
+        difficulty: difficulty,
+        constant: song[difficulty]
+      }
+      
+      // 获取物量
+      const notesKey = `${difficulty}Notes`
+      const notes = song[notesKey]
+      if (notes && notes > 0) {
+        totalNotes.value = notes.toString()
+        
+        // 自动填写Pure数量为物量
+        pureCount.value = notes.toString()
+        
+        console.log(`从歌曲列表加载: ${song.name} [${difficulty.toUpperCase()}] 物量: ${notes}`)
+      }
+    }
+  }
 })
 
 
