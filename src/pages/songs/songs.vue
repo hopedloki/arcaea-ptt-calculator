@@ -101,25 +101,58 @@ const searchText = ref('')
 // 加载状态
 const loading = ref(false)
 
-// 筛选选项 - 定数值（精度0.1）
-const generateConstantRangeOptions = () => {
-  const options = [{ name: '全部定数', value: null }]
-  // 从1.0开始，到12.0结束，每0.1一个值
-  for (let i = 10; i <= 120; i++) {
-    const value = i / 10
-    options.push({ name: value.toFixed(1), value })
-  }
-  return options
-}
-const constantRangeOptions = generateConstantRangeOptions()
-const constantRangeIndex = ref(0)
-
 // 歌曲数据
 const songsData = ref<any[]>([])
 
 // 曲包选项
 const packOptions = ref<string[]>(['全部曲包'])
 const packIndex = ref(0)
+
+// 筛选选项 - 定数值（精度0.1）
+const constantRangeOptions = ref<{ name: string; value: number | null }[]>([])
+const constantRangeIndex = ref(0)
+
+// 根据当前曲包生成定数范围选项
+const generateConstantRangeOptions = () => {
+  let songs = [...songsData.value]
+
+  // 如果选择了特定曲包，先筛选该曲包的歌曲
+  if (packIndex.value > 0) {
+    const selectedPack = packOptions.value[packIndex.value]
+    songs = songs.filter(song =>
+      song.pack === selectedPack ||
+      song.pack.toLowerCase() === selectedPack.toLowerCase()
+    )
+  }
+
+  // 提取所有存在的定数值
+  const constantSet = new Set<number>()
+  songs.forEach(song => {
+    const difficulties = ['pst', 'prs', 'ftr', 'byd', 'etr']
+    difficulties.forEach(diff => {
+      const constant = song[diff]
+      if (constant !== null && constant !== undefined) {
+        constantSet.add(constant)
+      }
+    })
+  })
+
+  // 生成选项
+  const options = [{ name: '全部定数', value: null }]
+  const constants = Array.from(constantSet).sort((a, b) => a - b)
+  constants.forEach(constant => {
+    options.push({ name: constant.toFixed(1), value: constant })
+  })
+
+  constantRangeOptions.value = options
+
+  // 如果当前选中的定数不在新的选项中，重置为"全部定数"
+  if (constantRangeIndex.value > 0 && constantRangeIndex.value >= options.length) {
+    constantRangeIndex.value = 0
+  }
+
+  console.log('生成定数范围选项，共', constants.length, '个定数值')
+}
 
 // 筛选后的歌曲
 const filteredSongs = computed(() => {
@@ -144,7 +177,7 @@ const filteredSongs = computed(() => {
   }
 
   // 定数值筛选（精确匹配0.1精度）
-  const selectedConstant = constantRangeOptions[constantRangeIndex.value].value
+  const selectedConstant = constantRangeOptions.value[constantRangeIndex.value].value
   if (selectedConstant !== null) {
     filtered = filtered.filter(song => {
       const difficulties = ['pst', 'prs', 'ftr', 'byd', 'etr']
@@ -192,6 +225,8 @@ const loadSongs = async () => {
         songsData.value = localSongs
         // 提取曲包列表
         extractPackList(localSongs)
+        // 生成定数范围选项
+        generateConstantRangeOptions()
         console.log('从本地存储加载歌曲数据，共', localSongs.length, '首歌曲')
       }
     } else {
@@ -214,6 +249,8 @@ const loadCompleteSongsData = async () => {
     songsData.value = songsArray
     // 提取所有曲包列表（去重）
     extractPackList(songsArray)
+    // 生成定数范围选项
+    generateConstantRangeOptions()
     // 保存到本地存储
     try {
       uni.setStorageSync('songs_data', songsArray)
@@ -260,6 +297,10 @@ const onConstantRangeChange = (e: any) => {
 // 曲包选择变化
 const onPackChange = (e: any) => {
   packIndex.value = e.detail.value
+  // 重新生成定数范围选项
+  generateConstantRangeOptions()
+  // 重置定数选择为"全部定数"
+  constantRangeIndex.value = 0
 }
 
 // 重置筛选条件
