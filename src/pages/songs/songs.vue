@@ -281,8 +281,6 @@ const extractPackList = (songs: any[]) => {
   console.log('提取曲包列表成功，共', packArray.length, '个曲包')
 }
 
-
-
 // 搜索输入变化
 const onSearchInput = () => {
   // 实时搜索，这里不需要额外操作
@@ -357,30 +355,47 @@ const selectSong = (song: any) => {
   })
 }
 
-// 选择特定难度的歌曲（直接跳转到容错计算）
+// 选择特定难度的歌曲
 const selectSongWithDifficulty = (song: any, difficulty: string) => {
-  // 转换为SimpleSongData格式
-  const simpleSong = {
+  // 构建选中歌曲信息
+  const selectedInfo = {
     id: song.id,
     name: song.name,
     artist: song.artist,
     pack: song.pack,
     dl: song.dl,
     alias: song.alias || [],
-    [difficulty]: song[difficulty],
-    [`${difficulty}Notes`]: song[`${difficulty}Notes`]
+    difficulty: difficulty,
+    constant: song[difficulty],
+    notes: song[`${difficulty}Notes`] || null
   }
   
-  // 保存到本地存储
-  uni.setStorageSync('selected_song_for_tolerance', {
-    song: simpleSong,
-    difficulty: difficulty
-  })
-  
-  // 跳转到容错计算页面
-  uni.navigateTo({
-    url: '/pages/calculator/tolerance?from=songs'
-  })
+  // 根据来源页面决定行为
+  if (fromPage.value === 'add') {
+    // 来自添加成绩页面：直接返回，填充歌曲信息
+    uni.setStorageSync('selected_song_for_add', selectedInfo)
+    uni.navigateBack()
+  } else if (fromPage.value === 'tolerance') {
+    // 来自容错计算页面：直接返回，填充歌曲信息
+    uni.setStorageSync('selected_song_for_tolerance', {
+      song: selectedInfo,
+      difficulty: difficulty
+    })
+    uni.navigateBack()
+  } else if (fromPage.value === 'calculator') {
+    // 来自计算器页面：直接返回，填充歌曲信息
+    uni.setStorageSync('selected_song_for_calculator', selectedInfo)
+    uni.navigateBack()
+  } else {
+    // 其他情况：跳转到容错计算页面（默认行为）
+    uni.setStorageSync('selected_song_for_tolerance', {
+      song: selectedInfo,
+      difficulty: difficulty
+    })
+    uni.navigateTo({
+      url: '/pages/calculator/tolerance?from=songs'
+    })
+  }
 }
 
 // 返回来源页面
@@ -528,6 +543,11 @@ const getDifficultyClass = (difficulty: string): string => {
   background: #f8f9fa;
   border-radius: 16rpx;
   padding: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.song-item:active {
+  background: #f0f0f0;
 }
 
 .song-info {
@@ -566,10 +586,53 @@ const getDifficultyClass = (difficulty: string): string => {
   font-size: 22rpx;
 }
 
+.song-difficulties {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.difficulty-item {
+  min-width: 80rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-item:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+}
+
+.difficulty-item:active {
+  transform: translateY(0);
+  opacity: 0.9;
+}
+
+.difficulty-name {
+  font-size: 24rpx;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.difficulty-constant {
+  font-size: 26rpx;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 .difficulty-notes {
   font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
   margin-top: 2rpx;
+  line-height: 1.2;
 }
 
 .difficulty-pst {
@@ -619,5 +682,10 @@ const getDifficultyClass = (difficulty: string): string => {
   padding: 20rpx 40rpx;
   font-size: 28rpx;
   border: none;
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+}
+
+.reset-btn:active {
+  transform: scale(0.98);
 }
 </style>

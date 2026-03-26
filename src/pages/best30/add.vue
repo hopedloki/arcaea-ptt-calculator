@@ -183,16 +183,30 @@ onMounted(() => {
 // 页面显示时检查是否有新选择的歌曲
 onPageShow(() => {
   // 检查是否有新选择的歌曲
-  const recentSong = uni.getStorageSync('recent_song')
-  if (recentSong) {
-    // 检查是否与当前选中的歌曲不同
-    if (!selectedSong.value.name ||
-        selectedSong.value.name !== recentSong.name ||
-        selectedSong.value.difficulty !== recentSong.difficulty) {
-      selectedSong.value = recentSong
-      calculatePttAndRating() // 重新计算PTT和评级
-      console.log('页面显示时更新了选中的歌曲:', recentSong)
+  const selectedSongForAdd = uni.getStorageSync('selected_song_for_add')
+  if (selectedSongForAdd) {
+    // 更新选中的歌曲信息
+    selectedSong.value = {
+      name: selectedSongForAdd.name,
+      difficulty: selectedSongForAdd.difficulty,
+      constant: selectedSongForAdd.constant,
+      notes: selectedSongForAdd.notes
     }
+    
+    // 清除临时存储
+    uni.removeStorageSync('selected_song_for_add')
+    
+    // 重新计算PTT和评级
+    calculatePttAndRating() 
+    
+    console.log('页面显示时更新了选中的歌曲:', selectedSongForAdd)
+  }
+  
+  // 获取可能的歌曲选择
+  const recentSong = uni.getStorageSync('recent_song')
+  if (recentSong && !selectedSong.value.name) {
+    selectedSong.value = recentSong
+    calculatePttAndRating() // 重新计算PTT和评级
   }
 })
 

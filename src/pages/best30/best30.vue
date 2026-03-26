@@ -473,17 +473,15 @@ const exportData = () => {
   try {
     // 按PTT从高到低排序，确定B几排名
     const sortedRecords = [...best30Records.value]
+      .sort((a, b) => b.ptt - a.ptt)
       .map((record, index) => {
-        // 在原始数组中找到记录的真实索引作为备用
+        // 在原始数组中找到记录的真实索引
         const originalIndex = best30Records.value.findIndex(
           r => r.songName === record.songName && r.difficulty === record.difficulty
         )
         
-        // 如果能找到真实索引，使用它，否则使用排序后的索引+1
-        const rank = originalIndex !== -1 ? originalIndex + 1 : index + 1
-        
         return {
-          rank: rank,  // B几排名
+          rank: index + 1,  // B几排名（基于排序后的位置）
           songName: record.songName,
           difficulty: record.difficulty,
           constant: record.constant,
@@ -495,7 +493,8 @@ const exportData = () => {
           farCount: record.farCount !== undefined ? record.farCount : null,
           lostCount: record.lostCount !== undefined ? record.lostCount : null,
           remark: record.remark || null,
-          createdAt: record.createdAt || null
+          createdAt: record.createdAt || null,
+          updatedAt: record.updatedAt || null
         }
       })
     
@@ -514,7 +513,8 @@ const exportData = () => {
       metadata: {
         appName: 'Arcaea PTT计算器',
         appVersion: '1.2.5',
-        exportType: 'B30全量导出'
+        exportType: 'B30全量导出',
+        description: '包含所有B30记录的完整数据导出'
       }
     }
     
@@ -524,15 +524,20 @@ const exportData = () => {
     // #ifdef H5
     // 在H5环境下直接创建下载链接
     try {
-      const blob = new Blob([jsonStr], { type: 'application/json' })
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.download = fileName
+      link.style.display = 'none'
       document.body.appendChild(link)
       link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      
+      // 延迟清理，确保下载开始
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }, 100)
       
       uni.showToast({
         title: '导出成功',
