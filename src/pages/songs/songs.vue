@@ -53,20 +53,24 @@
       </view>
       
       <view class="songs-list" v-if="filteredSongs.length > 0">
-        <view 
-          class="song-item" 
-          v-for="(song, index) in filteredSongs" 
+        <view
+          class="song-item"
+          v-for="(song, index) in filteredSongs"
           :key="index"
           @click="selectSong(song)"
         >
           <view class="song-info">
             <text class="song-name">{{ song.name }}</text>
             <text class="song-artist">{{ song.artist || '' }}</text>
+            <view class="song-meta">
+              <text class="song-pack">{{ song.pack }}</text>
+              <text class="song-dl" v-if="song.dl">📥</text>
+            </view>
           </view>
-          
+
           <view class="song-difficulties">
-            <view 
-              class="difficulty-item" 
+            <view
+              class="difficulty-item"
               v-for="(difficulty, key) in getAvailableDifficulties(song)"
               :key="key"
               :class="getDifficultyClass(key)"
@@ -74,6 +78,7 @@
             >
               <text class="difficulty-name">{{ difficulty.name }}</text>
               <text class="difficulty-constant">{{ difficulty.constant }}</text>
+              <text class="difficulty-notes" v-if="getNotesCount(song, key)">{{ getNotesCount(song, key) }}</text>
             </view>
           </view>
         </view>
@@ -319,7 +324,7 @@ const getAvailableDifficulties = (song: any) => {
     byd: { name: 'BYD', constant: song.byd },
     etr: { name: 'ETR', constant: song.etr }
   }
-  
+
   // 过滤掉不存在的难度
   const available: any = {}
   for (const key in difficulties) {
@@ -327,8 +332,21 @@ const getAvailableDifficulties = (song: any) => {
       available[key] = difficulties[key]
     }
   }
-  
+
   return available
+}
+
+// 获取指定难度的物量
+const getNotesCount = (song: any, difficulty: string) => {
+  const notesMap: Record<string, string> = {
+    pst: song.pstNotes,
+    prs: song.prsNotes,
+    ftr: song.ftrNotes,
+    byd: song.bydNotes,
+    etr: song.etrNotes
+  }
+  const notes = notesMap[difficulty]
+  return notes && notes > 0 ? notes : null
 }
 
 // 选择歌曲（显示详情）
