@@ -158,13 +158,24 @@ const generateConstantRangeOptions = () => {
 const filteredSongs = computed(() => {
   let filtered = [...songsData.value]
 
+  console.log('筛选前歌曲数:', filtered.length)
+  console.log('当前曲包索引:', packIndex.value, '曲包名:', packOptions.value[packIndex.value])
+  console.log('当前定数索引:', constantRangeIndex.value, '定数值:', constantRangeOptions.value[constantRangeIndex.value]?.value)
+  console.log('搜索文本:', searchText.value)
+
   // 曲包筛选
   if (packIndex.value > 0) {
     const selectedPack = packOptions.value[packIndex.value]
-    filtered = filtered.filter(song =>
-      song.pack === selectedPack ||
-      song.pack.toLowerCase() === selectedPack.toLowerCase()
-    )
+    console.log('筛选曲包:', selectedPack)
+    filtered = filtered.filter(song => {
+      const songPack = song.pack || ''
+      const matches = songPack === selectedPack || songPack.toLowerCase() === selectedPack.toLowerCase()
+      if (!matches && packIndex.value === 1) {
+        console.log('歌曲曲包不匹配:', song.name, '曲包:', songPack, '筛选:', selectedPack)
+      }
+      return matches
+    })
+    console.log('曲包筛选后歌曲数:', filtered.length)
   }
 
   // 文本搜索
@@ -174,11 +185,13 @@ const filteredSongs = computed(() => {
       song.name.toLowerCase().includes(searchLower) ||
       (song.artist && song.artist.toLowerCase().includes(searchLower))
     )
+    console.log('文本搜索后歌曲数:', filtered.length)
   }
 
   // 定数值筛选（精确匹配0.1精度）
-  const selectedConstant = constantRangeOptions.value[constantRangeIndex.value].value
+  const selectedConstant = constantRangeOptions.value[constantRangeIndex.value]?.value
   if (selectedConstant !== null) {
+    console.log('筛选定数:', selectedConstant)
     filtered = filtered.filter(song => {
       const difficulties = ['pst', 'prs', 'ftr', 'byd', 'etr']
       return difficulties.some(diff => {
@@ -188,8 +201,10 @@ const filteredSongs = computed(() => {
                Math.abs(constant - selectedConstant) < 0.001
       })
     })
+    console.log('定数筛选后歌曲数:', filtered.length)
   }
 
+  console.log('最终筛选结果歌曲数:', filtered.length)
   return filtered
 })
 
