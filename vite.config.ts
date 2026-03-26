@@ -5,6 +5,13 @@ import uni from "@dcloudio/vite-plugin-uni";
 export default defineConfig({
   plugins: [uni()],
   base: './',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined // 禁用代码分割
+      }
+    }
+  },
   optimizeDeps: {
     exclude: ['@cloudbase/adapter-uni-app'],
   },
