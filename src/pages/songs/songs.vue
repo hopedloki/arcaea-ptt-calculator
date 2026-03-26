@@ -547,31 +547,29 @@ const getDifficultyClass = (difficulty: string): string => {
   color: #666;
 }
 
-.song-difficulties {
+.song-meta {
   display: flex;
-  gap: 12rpx;
-  flex-wrap: wrap;
-}
-
-.difficulty-item {
-  padding: 12rpx 16rpx;
-  border-radius: 12rpx;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  min-width: 80rpx;
+  gap: 10rpx;
+  margin-top: 4rpx;
 }
 
-.difficulty-name {
-  font-size: 24rpx;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 4rpx;
+.song-pack {
+  font-size: 22rpx;
+  color: #999;
+  background: #e0e0e0;
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
 }
 
-.difficulty-constant {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
+.song-dl {
+  font-size: 22rpx;
+}
+
+.difficulty-notes {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2rpx;
 }
 
 .difficulty-pst {
