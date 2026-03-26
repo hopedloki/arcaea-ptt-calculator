@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
 import { initCloudBase, checkEnvironment } from "./utils/cloudbase";
-import { initializeSongsDatabase } from "./utils/songs-database";
+import { fetchSongsFromAPI } from "./utils/songs-database";
 
 onLaunch(async () => {
   console.log("App Launch");
 
   // 初始化歌曲数据库
   try {
-    initializeSongsDatabase();
+    await fetchSongsFromAPI();
   } catch (error) {
     console.error("歌曲数据库初始化异常:", error);
   }

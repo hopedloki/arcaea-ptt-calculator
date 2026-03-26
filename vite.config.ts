@@ -5,9 +5,9 @@ import uni from "@dcloudio/vite-plugin-uni";
 export default defineConfig({
   plugins: [uni()],
   base: './',
-  // optimizeDeps: {
-  //   exclude: ['@cloudbase/adapter-uni-app'],  // 排除 @cloudbase/adapter-uni-app 依赖
-  // },
+  optimizeDeps: {
+    exclude: ['@cloudbase/adapter-uni-app'],
+  },
   server: {
     host: '0.0.0.0',  // 使用IP地址代替localhost
     proxy: {

@@ -74,15 +74,16 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { loadSongsData, initializeSongsDatabase } from '@/utils/songs-database'
-// 直接导入歌曲常量数据
-import { getSongsData } from '@/utils/song-constants.js'
+import { loadSongsDataFromStorage, fetchSongsFromAPI } from '@/utils/songs-database'
 
 // 页面来源
 const fromPage = ref('')
 
 // 搜索文本
 const searchText = ref('')
+
+// 加载状态
+const loading = ref(false)
 
 // 筛选选项 - 定数值（精度0.1）
 const generateConstantRangeOptions = () => {
@@ -145,16 +146,19 @@ onMounted(() => {
 })
 
 // 加载歌曲数据
-const loadSongs = () => {
-  // 从本地存储加载歌曲数据
+const loadSongs = async () => {
+  if (loading.value) return
+  loading.value = true
+
   try {
-    const localSongs = loadSongsData()
+    // 从本地存储加载歌曲数据
+    const localSongs = loadSongsDataFromStorage()
     
     if (localSongs && localSongs.length > 0) {
-      // 检查本地存储的歌曲数量是否完整（应该有500+首）
-      if (localSongs.length < 400) {
+      // 检查本地存储的歌曲数量是否完整（新数据应该有1000+首）
+      if (localSongs.length < 800) {
         console.log('本地存储的歌曲数据不完整，只有', localSongs.length, '首，重新加载完整数据')
-        loadCompleteSongsData()
+        await loadCompleteSongsData()
       } else {
         songsData.value = localSongs
         console.log('从本地存储加载歌曲数据，共', localSongs.length, '首歌曲')
@@ -162,19 +166,20 @@ const loadSongs = () => {
     } else {
       // 本地没有数据，直接加载完整歌曲数据
       console.log('本地没有数据，直接加载完整歌曲数据')
-      loadCompleteSongsData()
+      await loadCompleteSongsData()
     }
   } catch (e) {
     console.error('加载歌曲数据失败', e)
-    loadCompleteSongsData()
+    await loadCompleteSongsData()
+  } finally {
+    loading.value = false
   }
 }
 
 // 加载完整的歌曲数据
-const loadCompleteSongsData = () => {
-  // 直接使用静态导入的歌曲常量数据
+const loadCompleteSongsData = async () => {
   try {
-    const songsArray = getSongsData()
+    const songsArray = await fetchSongsFromAPI()
     songsData.value = songsArray
     // 保存到本地存储
     try {
