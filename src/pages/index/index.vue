@@ -132,7 +132,7 @@
 
     <!-- 底部信息 -->
     <view class="footer">
-      <text class="footer-text">版本 1.2.5</text>
+      <text class="footer-text">版本 1.2.6</text>
       <view class="footer-decoration"></view>
     </view>
   </view>
