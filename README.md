@@ -68,66 +68,6 @@
 ├── package.json                  # 项目依赖
 ├── cloudbaserc.json              # CloudBase CLI 配置
 └── README.md                     # 项目说明
-```
-
-## 开始使用
-
-### 前提条件
-
-- 安装 Node.js (版本 16 或更高)
-- 安装 HBuilderX 或其他支持 UniApp 的开发工具
-- 腾讯云开发账号 (可在[腾讯云开发官网](https://tcb.cloud.tencent.com/)注册)
-
-### 安装依赖
-
-```bash
-npm install
-```
-
-### 配置云开发环境
-
-1. 打开 `src/utils/cloudbase.ts` 文件
-2. 将 `ENV_ID` 变量的值修改为您的云开发环境 ID
-
-```typescript
-const ENV_ID = 'your-env-id'; // 替换为您的云开发环境ID
-```
-
-### 本地开发
-
-```bash
-# H5 开发
-npm run dev:h5
-
-# 微信小程序开发
-npm run dev:mp-weixin
-
-# 抖音小程序开发
-npm run dev:mp-toutiao
-
-# 支付宝小程序开发
-npm run dev:mp-alipay
-
-# App (iOS/Android) 开发
-# 1. 使用 HBuilderX 打开项目
-# 2. 在顶部菜单栏选择【运行】->【运行到手机或模拟器】-> 选择您的设备
-```
-
-### 构建生产版本
-
-```bash
-# 构建 H5 版本
-npm run build:h5
-
-# 构建微信小程序
-npm run build:mp-weixin
-
-# 构建抖音小程序
-npm run build:mp-toutiao
-
-# 构建支付宝小程序
-npm run build:mp-alipay
-```
 
 ## PTT计算原理
 
