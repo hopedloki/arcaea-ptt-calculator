@@ -382,146 +382,196 @@ const exportAllData = () => {
     const jsonStr = JSON.stringify(data, null, 2)
     const fileName = `arcaea-ptt-full-backup-${Date.now()}.json`
     
-    // 保存到本地
+    // #ifdef H5
+    // H5环境：创建下载链接
+    const blob = new Blob([jsonStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    uni.showToast({ title: '导出成功', icon: 'success' })
+    // #endif
+    
+    // #ifndef H5
+    // App环境：保存到本地文件
     const fileManager = uni.getFileSystemManager()
-    const filePath = `${uni.env.USER_DATA_PATH}/${fileName}`
+    // 使用更通用的路径
+    const tempFilePath = `${uni.env.USER_DATA_PATH || plus.io.convertLocalFileSystemURL('')}${fileName}`
     
     fileManager.writeFile({
-      filePath: filePath,
+      filePath: tempFilePath,
       data: jsonStr,
       encoding: 'utf8',
       success: () => {
-        // #ifdef H5
-        // 在H5环境下创建下载链接
-        const blob = new Blob([jsonStr], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = fileName
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-        // #endif
-        
-        // #ifndef H5
-        // 在非H5环境下提示保存位置
-        uni.showModal({
-          title: '导出成功',
-          content: `数据已导出到: ${filePath}`,
-          showCancel: false
-        })
-        // #endif
-        
-        uni.showToast({
-          title: '导出成功',
-          icon: 'success'
+        // 尝试分享文件
+        uni.share({
+          provider: 'weixin',
+          type: 'file',
+          filePath: tempFilePath,
+          success: () => {
+            uni.showToast({ title: '分享成功', icon: 'success' })
+          },
+          fail: () => {
+            // 分享失败时，显示文件路径
+            uni.showModal({
+              title: '导出成功',
+              content: `数据已导出，文件位于应用私有目录。\n您可以使用文件管理器访问：\n${fileName}`,
+              showCancel: false
+            })
+          }
         })
       },
       fail: (err) => {
         console.error('导出失败', err)
-        uni.showToast({
-          title: '导出失败',
-          icon: 'none'
+        // 回退：保存到剪贴板
+        uni.setClipboardData({
+          data: jsonStr,
+          success: () => {
+            uni.showToast({ title: '已复制到剪贴板，请粘贴保存', icon: 'none', duration: 3000 })
+          },
+          fail: () => {
+            uni.showToast({ title: '导出失败', icon: 'none' })
+          }
         })
       }
     })
+    // #endif
   } catch (e) {
     console.error('导出数据失败', e)
-    uni.showToast({
-      title: '导出失败',
-      icon: 'none'
-    })
+    uni.showToast({ title: '导出失败', icon: 'none' })
   }
 }
 
 // 导入数据
 const importData = () => {
+  // #ifdef H5
+  // H5环境：使用文件选择器
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+  input.onchange = (e: any) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const jsonStr = event.target?.result as string
+          processImportData(jsonStr)
+        } catch (err) {
+          uni.showToast({ title: '读取文件失败', icon: 'none' })
+        }
+      }
+      reader.readAsText(file)
+    }
+  }
+  input.click()
+  // #endif
+  
+  // #ifndef H5
+  // App环境：使用系统文件选择
   uni.chooseFile({
     count: 1,
     type: 'file',
-    success: (res) => {
+    extension: ['.json'],
+    success: (res: any) => {
       const tempFilePaths = res.tempFilePaths
       if (tempFilePaths && tempFilePaths.length > 0) {
-        // 读取文件内容
         const fileManager = uni.getFileSystemManager()
         fileManager.readFile({
           filePath: tempFilePaths[0],
           encoding: 'utf8',
-          success: (readRes) => {
-            try {
-              const data = JSON.parse(readRes.data as string)
-              
-              if (data.type === 'full-export') {
-                // 导入完整数据
-                if (data.best30Records && Array.isArray(data.best30Records)) {
-                  best30Records.value = data.best30Records
-                  uni.setStorageSync('best30_records', data.best30Records)
-                }
-                
-                if (data.recentRecords && Array.isArray(data.recentRecords)) {
-                  recentRecords.value = data.recentRecords
-                  uni.setStorageSync('recent_scores', data.recentRecords)
-                }
-                
-                if (data.pttData) {
-                  currentPTT.value = data.pttData.currentPTT || 0
-                  best10Avg.value = data.pttData.best10Avg || 0
-                  best30Avg.value = data.pttData.best30Avg || 0
-                  recent10Avg.value = data.pttData.recent10Avg || 0
-                  
-                  if (data.pttData.lastUpdated) {
-                    const date = new Date(data.pttData.lastUpdated)
-                    lastUpdated.value = formatDate(date)
-                  }
-                  
-                  uni.setStorageSync('ptt_data', {
-                    currentPTT: currentPTT.value,
-                    best10Avg: best10Avg.value,
-                    best30Avg: best30Avg.value,
-                    recent10Avg: recent10Avg.value,
-                    lastUpdated: data.pttData.lastUpdated || Date.now()
-                  })
-                }
-                
-                uni.showToast({
-                  title: '导入成功',
-                  icon: 'success'
-                })
-              } else if (data.best30Records && Array.isArray(data.best30Records)) {
-                // 兼容旧格式导入
-                best30Records.value = data.best30Records
-                uni.setStorageSync('best30_records', data.best30Records)
-                refreshPTT()
-                uni.showToast({
-                  title: '导入成功',
-                  icon: 'success'
-                })
-              } else {
-                uni.showToast({
-                  title: '数据格式不正确',
-                  icon: 'none'
-                })
-              }
-            } catch (e) {
-              console.error('解析数据失败', e)
-              uni.showToast({
-                title: '解析数据失败',
-                icon: 'none'
-              })
-            }
+          success: (readRes: any) => {
+            processImportData(readRes.data)
           },
           fail: (err) => {
             console.error('读取文件失败', err)
-            uni.showToast({
-              title: '读取文件失败',
-              icon: 'none'
-            })
+            uni.showToast({ title: '读取文件失败', icon: 'none' })
           }
         })
       }
+    },
+    fail: () => {
+      // 尝试使用分享方式导入
+      uni.showModal({
+        title: '导入提示',
+        content: '请将备份的JSON文件放到可访问位置后重试，或使用剪贴板导入',
+        confirmText: '剪贴板导入',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            // 从剪贴板导入
+            uni.getClipboardData({
+              success: (clipRes) => {
+                if (clipRes.data) {
+                  processImportData(clipRes.data)
+                } else {
+                  uni.showToast({ title: '剪贴板为空', icon: 'none' })
+                }
+              }
+            })
+          }
+        }
+      })
     }
   })
+  // #endif
+}
+
+// 处理导入数据
+const processImportData = (jsonStr: string) => {
+  try {
+    const data = JSON.parse(jsonStr)
+    
+    if (data.type === 'full-export') {
+      // 导入完整数据
+      if (data.best30Records && Array.isArray(data.best30Records)) {
+        best30Records.value = data.best30Records
+        uni.setStorageSync('best30_records', data.best30Records)
+      }
+      
+      if (data.recentRecords && Array.isArray(data.recentRecords)) {
+        recentRecords.value = data.recentRecords
+        uni.setStorageSync('recent_scores', data.recentRecords)
+      }
+      
+      if (data.pttData) {
+        currentPTT.value = data.pttData.currentPTT || 0
+        best10Avg.value = data.pttData.best10Avg || 0
+        best30Avg.value = data.pttData.best30Avg || 0
+        recent10Avg.value = data.pttData.recent10Avg || 0
+        
+        if (data.pttData.lastUpdated) {
+          const date = new Date(data.pttData.lastUpdated)
+          lastUpdated.value = formatDate(date)
+        }
+        
+        uni.setStorageSync('ptt_data', {
+          currentPTT: currentPTT.value,
+          best10Avg: best10Avg.value,
+          best30Avg: best30Avg.value,
+          recent10Avg: recent10Avg.value,
+          lastUpdated: data.pttData.lastUpdated || Date.now()
+        })
+      }
+      
+      uni.showToast({ title: '导入成功', icon: 'success' })
+    } else if (data.best30Records && Array.isArray(data.best30Records)) {
+      // 兼容旧格式导入
+      best30Records.value = data.best30Records
+      uni.setStorageSync('best30_records', data.best30Records)
+      refreshPTT()
+      uni.showToast({ title: '导入成功', icon: 'success' })
+    } else {
+      uni.showToast({ title: '数据格式不正确', icon: 'none' })
+    }
+  } catch (e) {
+    console.error('解析数据失败', e)
+    uni.showToast({ title: '数据格式不正确', icon: 'none' })
+  }
 }
 
 // 同步数据

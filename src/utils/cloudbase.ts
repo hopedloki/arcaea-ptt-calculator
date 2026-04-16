@@ -1,8 +1,9 @@
+// #ifdef H5
 import cloudbase from '@cloudbase/js-sdk'
 import adapter from '@cloudbase/adapter-uni-app'
 
 // 使用 UniApp 适配器
-cloudbase.useAdapters(adapter,{uni: uni});
+cloudbase.useAdapters(adapter, { uni: uni });
 
 // 云开发环境ID，使用时请替换为您的环境ID
 const ENV_ID: string = import.meta.env.VITE_ENV_ID || '';
@@ -388,3 +389,41 @@ export default {
   signInWithPhoneAuth,
   signInWithOpenId
 };
+// #endif
+
+// #ifndef H5
+// App 端：导出空函数，避免引用报错
+export const isValidEnvId = false;
+export const init = () => null;
+export const app = null;
+export const auth = null;
+export const checkEnvironment = () => false;
+export const login = async () => { throw new Error('云开发仅在H5端可用'); };
+export const initCloudBase = async () => true;
+export const logout = async () => {};
+export const ensureLogin = async () => { throw new Error('云开发仅在H5端可用'); };
+export const getPhoneVerification = async () => { throw new Error('云开发仅在H5端可用'); };
+export const signInWithPhoneCode = async () => { throw new Error('云开发仅在H5端可用'); };
+export const getEmailVerification = async () => { throw new Error('云开发仅在H5端可用'); };
+export const signInWithEmailCode = async () => { throw new Error('云开发仅在H5端可用'); };
+export const signInWithPassword = async () => { throw new Error('云开发仅在H5端可用'); };
+export const signInWithPhoneAuth = async () => { throw new Error('云开发仅在H5端可用'); };
+export const signInWithOpenId = async () => { throw new Error('云开发仅在H5端可用'); };
+export default {
+  init: () => null,
+  app: null,
+  ensureLogin: async () => { throw new Error('云开发仅在H5端可用'); },
+  login: async () => { throw new Error('云开发仅在H5端可用'); },
+  logout: async () => {},
+  checkEnvironment: () => false,
+  isValidEnvId: false,
+  initCloudBase: async () => true,
+  getPhoneVerification: async () => { throw new Error('云开发仅在H5端可用'); },
+  signInWithPhoneCode: async () => { throw new Error('云开发仅在H5端可用'); },
+  getEmailVerification: async () => { throw new Error('云开发仅在H5端可用'); },
+  signInWithEmailCode: async () => { throw new Error('云开发仅在H5端可用'); },
+  signInWithPassword: async () => { throw new Error('云开发仅在H5端可用'); },
+  signInWithPhoneAuth: async () => { throw new Error('云开发仅在H5端可用'); },
+  signInWithOpenId: async () => { throw new Error('云开发仅在H5端可用'); }
+};
+// #endif

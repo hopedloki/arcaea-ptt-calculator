@@ -8,9 +8,6 @@
             <text class="value">{{ currentPTT.toFixed(2) }}</text>
             <text class="label">当前PTT</text>
           </view>
-          <view class="ptt-indicator">
-            <text class="indicator-text">{{ getPTTLevel(currentPTT) }}</text>
-          </view>
         </view>
         <view class="ptt-stats">
           <view class="stat-item">

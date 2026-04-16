@@ -95,10 +95,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { loadSongsDataFromStorage, fetchSongsFromAPI } from '@/utils/songs-database'
 
 // 页面来源
 const fromPage = ref('')
+
+// 页面加载时获取参数
+onLoad((options: any) => {
+  if (options && options.from) {
+    fromPage.value = options.from
+    console.log('从页面进入:', fromPage.value)
+  }
+  loadSongs()
+})
 
 // 搜索文本
 const searchText = ref('')
@@ -198,18 +208,12 @@ const filteredSongs = computed(() => {
   return filtered
 })
 
-// 页面加载时获取数据
+// 页面加载时获取数据（备用，确保数据加载）
 onMounted(() => {
-  // 获取页面参数
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1]
-  const options = currentPage.options as any
-  
-  if (options && options.from) {
-    fromPage.value = options.from
+  // 如果 onLoad 没有执行（某些情况下），确保数据加载
+  if (songsData.value.length === 0 && !loading.value) {
+    loadSongs()
   }
-  
-  loadSongs()
 })
 
 // 加载歌曲数据
@@ -382,6 +386,8 @@ const selectSongWithDifficulty = (song: any, difficulty: string) => {
       key: 'selected_song_for_add',
       data: selectedSongData,
       success: () => {
+        // 同时保存 recent_song 供 add.vue 的 onPageShow 使用
+        uni.setStorageSync('recent_song', selectedSongData)
         uni.navigateBack()
       }
     })

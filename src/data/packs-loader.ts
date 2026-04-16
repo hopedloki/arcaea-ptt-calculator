@@ -3,6 +3,7 @@
  */
 
 import type { PackData } from './types'
+import packlistData from './packlist.json'
 
 /**
  * 缓存的曲包数据
@@ -19,9 +20,8 @@ export async function loadPackData(): Promise<PackData[]> {
   }
 
   try {
-    // 动态导入JSON数据
-    const packlistData = await import('./packlist.json')
-    cachedPackData = packlistData.default || packlistData
+    // 静态导入JSON数据
+    cachedPackData = packlistData as PackData[]
     return cachedPackData
   } catch (error) {
     console.error('加载曲包数据失败:', error)

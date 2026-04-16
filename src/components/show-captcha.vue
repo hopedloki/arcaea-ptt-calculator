@@ -68,7 +68,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import type { UniPopupInstance } from '@dcloudio/uni-ui'
+// #ifdef H5
 import { auth } from '../utils/cloudbase'
+// #endif
 
 const popup = ref<UniPopupInstance | null>(null)
 const captchaCode = ref('')
@@ -79,6 +81,7 @@ const loading = ref(false)
 const show = ref(false) // 控制 v-if 的响应式变量
 const isRefreshing = ref(false)
 
+// #ifdef H5
 // 这个 watch 会在 show 变为 true 后启动，直到 popup.value 被赋值
 watch(popup, (newPopupInstance) => {
   // 一旦 popup.value 不再是 null，说明实例已准备就绪
@@ -87,6 +90,7 @@ watch(popup, (newPopupInstance) => {
     newPopupInstance.open()
   }
 })
+// #endif
 
 // 图片加载错误处理
 const onImageError = (e: any) => {
@@ -98,6 +102,7 @@ const onImageError = (e: any) => {
 }
 
 // 刷新验证码
+// #ifdef H5
 const handleRefresh = async () => {
   if (isRefreshing.value) return; // 防止重复点击
   
@@ -113,6 +118,7 @@ const handleRefresh = async () => {
   // console.log('验证码数据已更新:', captchaData.value)
   isRefreshing.value = false 
 }
+// #endif
 
 // 打开验证码弹窗
 const openCaptcha = (data: any) => {
@@ -142,6 +148,7 @@ const closeCaptcha = () => {
 }
 
 // 用户点击"确定"
+// #ifdef H5
 const handleSubmit = async () => {
   if (!captchaCode.value.trim()) {
     uni.showToast({ title: '请输入验证码', icon: 'none' })
@@ -169,6 +176,7 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
+// #endif
 
 // 用户点击"取消"或关闭
 const handleCancel = () => {
@@ -181,6 +189,7 @@ const handleCancel = () => {
 }
 
 // 事件处理函数
+// #ifdef H5
 const captchaDataHandler = (data: any) => {
   console.log('接收到 CAPTCHA_DATA_CHANGE 事件:', data)
   if (data && data.url && data.token) {
@@ -191,17 +200,22 @@ const captchaDataHandler = (data: any) => {
     isRefreshing.value = false; // 重置刷新状态
   }
 }
+// #endif
 
 // 组件挂载
 onMounted(() => {
   console.log('验证码组件已挂载，开始监听事件')
+  // #ifdef H5
   uni.$on('CAPTCHA_DATA_CHANGE', captchaDataHandler)
+  // #endif
 })
 
 // 组件卸载
 onUnmounted(() => {
   console.log('验证码组件已卸载，移除事件监听')
+  // #ifdef H5
   uni.$off('CAPTCHA_DATA_CHANGE', captchaDataHandler)
+  // #endif
 })
 </script>
 

@@ -422,7 +422,7 @@
           <view class="result-icon">🔢</view>
           <view class="result-content">
             <text class="result-label">计算方式</text>
-            <text class="result-value">基于理论满分</text>
+            <text class="result-value">{{ toleranceMode === 'current' ? '基于当前判定' : '基于理论满分' }}</text>
           </view>
         </view>
       </view>
@@ -495,7 +495,7 @@
           <view class="result-icon">🔢</view>
           <view class="result-content">
             <text class="result-label">计算方式</text>
-            <text class="result-value">基于理论满分</text>
+            <text class="result-value">{{ toleranceMode === 'current' ? '基于当前判定' : '基于理论满分' }}</text>
           </view>
         </view>
       </view>
@@ -568,7 +568,7 @@
           <view class="result-icon">🔢</view>
           <view class="result-content">
             <text class="result-label">计算方式</text>
-            <text class="result-value">基于理论满分</text>
+            <text class="result-value">{{ toleranceMode === 'current' ? '基于当前判定' : '基于理论满分' }}</text>
           </view>
         </view>
       </view>

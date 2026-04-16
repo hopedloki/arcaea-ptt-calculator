@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+// #ifdef H5
 import { initCloudBase, checkEnvironment } from "./utils/cloudbase";
+// #endif
 import { fetchSongsFromAPI } from "./utils/songs-database";
 
 onLaunch(async () => {
@@ -13,7 +15,8 @@ onLaunch(async () => {
     console.error("歌曲数据库初始化异常:", error);
   }
 
-  // 只有在配置了云开发环境时才初始化
+  // #ifdef H5
+  // 只有在配置了云开发环境时才初始化（H5端）
   if (checkEnvironment()) {
     try {
       // 初始化云开发
@@ -28,6 +31,7 @@ onLaunch(async () => {
     }
   }
   // 如果没有配置云开发环境，静默跳过，不影响应用主要功能
+  // #endif
 });
 
 onShow(() => {

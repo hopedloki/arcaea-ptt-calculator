@@ -5,6 +5,7 @@
 
 import type { SongData, SimpleSongData } from './types'
 import { toSimpleSongData } from './types'
+import chartData from './chart-data.json'
 
 /**
  * 缓存的歌曲数据
@@ -22,9 +23,8 @@ export async function loadSongsData(): Promise<SongData[]> {
   }
 
   try {
-    // 动态导入JSON数据
-    const chartData = await import('./chart-data.json')
-    cachedSongsData = chartData.default || chartData
+    // 静态导入JSON数据
+    cachedSongsData = chartData as SongData[]
     return cachedSongsData
   } catch (error) {
     console.error('加载歌曲数据失败:', error)
