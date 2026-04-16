@@ -1,119 +1,97 @@
-# Arcaea PTT计算器
+# Arcaea PTT Calculator
 
-基于 UniApp 的 Arcaea PTT计算器跨平台应用重构，专为Arcaea玩家设计的PTT计算和管理工具，支持多平台运行：H5、微信小程序、支付宝小程序、抖音小程序以及App (iOS/Android)。
+专为 Arcaea 玩家设计的 PTT 计算和管理工具，支持多平台运行。
 
-> 本项目是对原Arcaea PTT计算器的UniApp重构版本，保留了核心功能的同时实现了跨平台兼容性。
+## 功能介绍
 
-## 核心功能
+### 1. PTT 计算器
 
-- **PTT计算**：成绩↔PTT双向转换，支持不同难度（PST/PRS/FTR/BYD/ETR）
-- **B30管理**：记录和管理您的最佳30个成绩，自动计算B30 PTT
-- **容错计算**：计算达到目标PTT所需的最小Far数或者Lost数
-- **歌曲库**：内置完整Arcaea歌曲数据库，支持搜索和筛选
-- **数据管理**：支持成绩记录的导入导出功能
-- **多平台适配**：基于UniApp实现一套代码多端运行
+支持成绩与 PTT 的双向转换计算：
 
-## 项目架构
+- **分数转 PTT**：输入成绩分数，自动计算对应的 Potential (PTT) 值
+- **PTT 转分数**：输入目标 PTT 值，计算所需的最低分数
+- **支持所有难度**：Past (PST)、Present (PRS)、Future (FTR)、Beyond (BYD)、Eternal (ETR)
+- **实时计算**：输入数据变化时自动更新结果
 
-### 前端架构
+### 2. B30 管理
 
-- **框架**：UniApp (基于 Vue 3)
-- **构建工具**：Vite
-- **多端支持**：H5、微信小程序、支付宝小程序、抖音小程序、App (iOS/Android)
-- **状态管理**：Vue 3 Reactivity API
-- **类型支持**：TypeScript
+管理您的最佳 30 个成绩记录：
 
-### UniApp重构特点
+- **成绩录入**：记录歌曲名称、难度、定数、分数、评级等信息
+- **B30 计算**：自动计算 Best 30 的平均 PTT 值
+- **成绩筛选**：支持按难度、评级筛选显示
+- **排序功能**：按 PTT、分数、日期等维度排序
+- **数据持久化**：本地存储成绩记录，关闭应用后数据保留
 
-相较于原项目，本次重构的主要优势：
+### 3. 容错计算
 
-- **跨平台兼容**：一套代码多端运行，无需为不同平台单独开发
-- **现代化UI**：优化的界面设计和交互体验
-- **性能提升**：基于Vue 3的性能优化和TypeScript的类型安全
+计算达成目标所需的容错空间：
 
-## 目录结构
+- **评级容错**：计算达到目标评级 (PM/EX+/EX/AA/A/B/C/D) 还能容错多少 Far 或 Lost
+- **分数容错**：计算达到目标分数还能容错多少判定
+- **PTT 容错**：计算达到目标 PTT 还能容错多少判定
+- **双模式计算**：
+  - 基于当前判定：按现有 Pure/Far/Lost 数量计算剩余容错空间
+  - 基于理论值：从理论满分计算到目标的误差范围
+- **物量自动填充**：选择歌曲后自动填充对应难度的 Note 数量
 
-```
-├── src/
-│   ├── components/               # 组件目录
-│   ├── pages/                    # 页面文件
-│   │   ├── index/                # 首页
-│   │   │   └── index.vue         # 主页面
-│   │   ├── calculator/           # 计算器页面
-│   │   │   ├── score-ptt.vue     # 成绩↔PTT转换
-│   │   │   └── tolerance.vue     # 容错计算
-│   │   ├── best30/               # B30管理
-│   │   │   ├── best30.vue        # B30列表
-│   │   │   └── add.vue           # 添加成绩
-│   │   ├── songs/                # 歌曲库
-│   │   │   └── songs.vue         # 歌曲列表
-│   │   ├── data/                 # 数据管理
-│   │   │   └── data.vue          # 导入导出
-│   │   └── about/                # 关于页面
-│   │       └── about.vue         # 应用信息
-│   ├── utils/                    # 工具函数
-│   │   ├── ptt-calculator.ts     # PTT计算核心逻辑
-│   │   ├── songs-database.ts     # 歌曲数据库
-│   │   └── data-manager.ts       # 数据管理工具
-│   ├── static/                   # 静态资源
-│   │   └── tabbar/               # 导航图标
-│   ├── App.vue                   # 应用入口组件
-│   ├── main.ts                   # 应用入口文件
-│   ├── pages.json                # 页面路由配置
-│   └── manifest.json             # 应用配置文件
-├── cloudfunctions/               # 云函数目录
-├── index.html                    # H5 模板
-├── vite.config.ts                # Vite 配置
-├── tsconfig.json                 # TypeScript 配置
-├── package.json                  # 项目依赖
-├── cloudbaserc.json              # CloudBase CLI 配置
-└── README.md                     # 项目说明
-```
+### 4. 歌曲库
 
-## 开始使用
+内置完整的 Arcaea 歌曲数据库：
 
-### 前提条件
+- **歌曲搜索**：按歌曲名称或艺术家搜索
+- **难度筛选**：按 PST/PRS/FTR/BYD/ETR 筛选歌曲
+- **信息完整**：包含定数、歌曲包、曲师等详细信息
+- **快速选择**：可直接从歌曲库选择歌曲用于计算或记录成绩
 
-- 安装 Node.js (版本 16 或更高)
-- 安装 HBuilderX 或其他支持 UniApp 的开发工具
-- 腾讯云开发账号 (可在[腾讯云开发官网](https://tcb.cloud.tencent.com/)注册)
+### 5. 数据管理
 
-### 安装依赖
+支持成绩数据的导入导出：
+
+- **数据导出**：将 B30 成绩记录导出为 JSON 文件备份
+- **数据导入**：从备份文件恢复成绩数据
+- **跨平台兼容**：H5 和 App 端均支持导入导出功能
+
+## 部署指南
+
+### 用户部署
+
+如果您只是想使用这个应用，请直接下载 Release 页面的 APK 安装包：
+
+1. 访问项目的 [Release 页面](https://github.com/hopedloki/-arcaea-ptt-calculator/releases)
+2. 下载最新版本的 APK 文件
+3. 在 Android 设备上安装 APK
+
+### 开发者部署
+
+如果您想在此基础上进行开发或自定义部署，请按以下步骤操作：
+
+#### 环境要求
+
+- Node.js 16.x 或更高版本
+- HBuilderX 或 VS Code + UniApp 插件
+
+#### 安装与运行
 
 ```bash
+# 克隆项目
+git clone https://github.com/hopedloki/-arcaea-ptt-calculator.git
+cd arcaea-ptt-calculator
+
+# 安装依赖
 npm install
-```
 
-### 配置云开发环境
-
-1. 打开 `src/utils/cloudbase.ts` 文件
-2. 将 `ENV_ID` 变量的值修改为您的云开发环境 ID
-
-```typescript
-const ENV_ID = 'your-env-id'; // 替换为您的云开发环境ID
-```
-
-### 本地开发
-
-```bash
-# H5 开发
+# H5 开发模式
 npm run dev:h5
 
-# 微信小程序开发
+# 微信小程序开发模式
 npm run dev:mp-weixin
 
-# 抖音小程序开发
-npm run dev:mp-toutiao
-
-# 支付宝小程序开发
-npm run dev:mp-alipay
-
-# App (iOS/Android) 开发
-# 1. 使用 HBuilderX 打开项目
-# 2. 在顶部菜单栏选择【运行】->【运行到手机或模拟器】-> 选择您的设备
+# App 开发模式
+# 使用 HBuilderX 打开项目，选择【运行】->【运行到手机或模拟器】
 ```
 
-### 构建生产版本
+#### 构建发布
 
 ```bash
 # 构建 H5 版本
@@ -122,101 +100,58 @@ npm run build:h5
 # 构建微信小程序
 npm run build:mp-weixin
 
-# 构建抖音小程序
-npm run build:mp-toutiao
-
-# 构建支付宝小程序
-npm run build:mp-alipay
+# 构建 App（使用 HBuilderX）
+# 选择【发行】->【原生App-云打包】
 ```
 
-## PTT计算原理
+## 技术实现
 
-本应用使用与原项目相同的PTT计算算法：
+### 计算算法
 
-- 单曲PTT计算：基于成绩定数和评级
-- B30计算：选取最好的30个成绩计算平均值
-- 容错计算：根据目标PTT反推所需最小Pure数
+应用采用与 Arcaea 官方一致的 PTT 计算标准：
 
-详细的计算公式和实现请参考 `src/utils/ptt-calculator.ts` 文件。
+- **分数系统**：单 Note 基础分 = 10,000,000 / Note总数
+- **判定分数**：Pure = 100%，Far = 50%，Lost = 0%
+- **附加分**：每个大 Pure 额外 +1 分，理论满分为 10,000,000 + Note总数
+- **PTT 分段**：
+  - 10,000,000 分：PTT = 定数 + 2.0
+  - 9,900,000-10,000,000：PTT = 定数 + 1.5 + (分数-9,900,000) / 100,000
+  - 9,800,000-9,900,000：PTT = 定数 + 1.0 + (分数-9,800,000) / 200,000
+  - 9,500,000-9,800,000：PTT = 定数 + (分数-9,500,000) / 300,000
 
-## 部署指南
-
-### 部署到云开发静态网站托管（H5版本）
-
-1. 构建 H5 版本：`npm run build:h5`
-2. 登录腾讯云开发控制台
-3. 进入您的环境 -> 静态网站托管
-4. 上传 `dist/build/h5` 目录中的文件
-
-### 微信小程序发布
-
-1. 构建微信小程序版本：`npm run build:mp-weixin`
-2. 使用微信开发者工具打开 `dist/build/mp-weixin` 目录
-3. 上传代码包并发布
-
-### 抖音小程序发布
-
-1. 构建抖音小程序版本：`npm run build:mp-toutiao`
-2. 使用抖音开发者工具打开 `dist/build/mp-toutiao` 目录
-3. 上传代码包并发布
-
-### 支付宝小程序发布
-
-1. 构建支付宝小程序版本：`npm run build:mp-alipay`
-2. 使用支付宝开发者工具打开 `dist/build/mp-alipay` 目录
-3. 上传代码包并发布
-
-## 数据导入导出
-
-支持以下数据格式：
-
-- **导出格式**：JSON文件，包含所有成绩记录
-- **导入格式**：支持原Arcaea PTT计算器导出的JSON格式
-- **数据备份**：定期导出数据文件进行备份
-
-## 技术栈
+### 技术栈
 
 - **UniApp** - 跨平台应用开发框架
-- **Vue 3** - 渐进式 JavaScript 框架
-- **TypeScript** - JavaScript 的超集，提供类型支持
-- **Vite** - 下一代前端构建工具
-- **CloudBase JS SDK** - 腾讯云开发 JavaScript SDK
+- **Vue 3** - 前端框架
+- **TypeScript** - 类型支持
+- **Vite** - 构建工具
+
+### 目录结构
+
+```
+├── src/
+│   ├── components/          # 公共组件
+│   ├── pages/               # 页面文件
+│   │   ├── index/           # 首页
+│   │   ├── calculator/      # PTT计算器页面
+│   │   ├── best30/          # B30管理页面
+│   │   ├── songs/           # 歌曲库页面
+│   │   ├── data/            # 数据管理页面
+│   │   └── about/           # 关于页面
+│   ├── data/                # 歌曲数据库
+│   ├── utils/               # 工具函数
+│   ├── static/              # 静态资源
+│   └── App.vue              # 应用入口
+├── package.json
+├── vite.config.ts
+└── tsconfig.json
+```
 
 ## 相关链接
 
-- [原Arcaea PTT计算器项目](https://github.com/hopedloki/-arcaea-ptt-calculator)
 - [UniApp 官方文档](https://uniapp.dcloud.io/)
-- [云开发官方文档](https://cloud.tencent.com/document/product/876)
-- [云开发 JS SDK](https://docs.cloudbase.net/api-reference/webv3/initialization)
-- [CloudBase AI ToolKit](https://github.com/TencentCloudBase/CloudBase-AI-ToolKit)
+- [Arcaea 官方网站](https://arcaea.lowiro.com/)
 
 ## 许可证
 
 MIT License
-
-## 更新日志
-
-### v1.2.5 (2025-12-16)
-
-- 基于原项目完成UniApp重构
-- 实现跨平台兼容性（H5、小程序、App）
-- UI界面现代化全面优化
-- 保留原有核心功能：PTT计算、B30管理、容错计算
-- 优化用户交互体验
-- 实现成绩数据管理功能
-
-### v1.2.0
-
-- 更新了录入B30的功能，支持计算地板、B30功能
-- 支持自由保存B30数据，以便下次需要可以导入
-
-### v1.1.0
-
-- 修复PTT的计算逻辑错误
-
-### v1.0.0
-
-- 首次发布完整功能版本
-- 修复了构建配置问题
-- 优化了UI界面
-- 完善了PTT计算算法
