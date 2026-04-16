@@ -357,43 +357,64 @@ const selectSong = (song: any) => {
 
 // 选择特定难度的歌曲
 const selectSongWithDifficulty = (song: any, difficulty: string) => {
-  // 构建选中歌曲信息
-  const selectedInfo = {
-    id: song.id,
+  // 构建选中歌曲信息（与 tolerance.vue 的预期格式一致）
+  const selectedSongData = {
     name: song.name,
     artist: song.artist,
-    pack: song.pack,
-    dl: song.dl,
-    alias: song.alias || [],
     difficulty: difficulty,
     constant: song[difficulty],
-    notes: song[`${difficulty}Notes`] || null
+    // 物量信息
+    pstNotes: song.pstNotes || null,
+    prsNotes: song.prsNotes || null,
+    ftrNotes: song.ftrNotes || null,
+    bydNotes: song.bydNotes || null,
+    etrNotes: song.etrNotes || null,
+    // 额外信息
+    id: song.id,
+    pack: song.pack,
+    dl: song.dl
   }
   
   // 根据来源页面决定行为
   if (fromPage.value === 'add') {
     // 来自添加成绩页面：直接返回，填充歌曲信息
-    uni.setStorageSync('selected_song_for_add', selectedInfo)
-    uni.navigateBack()
-  } else if (fromPage.value === 'tolerance') {
-    // 来自容错计算页面：直接返回，填充歌曲信息
-    uni.setStorageSync('selected_song_for_tolerance', {
-      song: selectedInfo,
-      difficulty: difficulty
+    uni.setStorage({
+      key: 'selected_song_for_add',
+      data: selectedSongData,
+      success: () => {
+        uni.navigateBack()
+      }
     })
-    uni.navigateBack()
+  } else if (fromPage.value === 'tolerance') {
+    // 来自容错计算页面：直接返回
+    // 使用 setStorage + callback 确保数据写入完成后再返回
+    uni.setStorage({
+      key: 'recent_song',
+      data: selectedSongData,
+      success: () => {
+        console.log('歌曲选择成功，准备返回:', selectedSongData.name)
+        uni.navigateBack()
+      }
+    })
   } else if (fromPage.value === 'calculator') {
     // 来自计算器页面：直接返回，填充歌曲信息
-    uni.setStorageSync('selected_song_for_calculator', selectedInfo)
-    uni.navigateBack()
+    uni.setStorage({
+      key: 'selected_song_for_calculator',
+      data: selectedSongData,
+      success: () => {
+        uni.navigateBack()
+      }
+    })
   } else {
     // 其他情况：跳转到容错计算页面（默认行为）
-    uni.setStorageSync('selected_song_for_tolerance', {
-      song: selectedInfo,
-      difficulty: difficulty
-    })
-    uni.navigateTo({
-      url: '/pages/calculator/tolerance?from=songs'
+    uni.setStorage({
+      key: 'recent_song',
+      data: selectedSongData,
+      success: () => {
+        uni.navigateTo({
+          url: '/pages/calculator/tolerance?from=songs'
+        })
+      }
     })
   }
 }

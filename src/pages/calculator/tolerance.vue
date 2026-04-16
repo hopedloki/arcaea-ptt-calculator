@@ -704,55 +704,73 @@ onMounted(() => {
 
 // 页面加载时检查是否有从歌曲详情传来的数据
 onLoad((options: any) => {
+  // 先尝试从 recent_song 读取（songs.vue 会保存到这个 key）
+  const recentSong = uni.getStorageSync('recent_song')
+  if (recentSong && recentSong.name) {
+    selectedSong.value = recentSong
+    
+    // 获取物量
+    const difficulty = recentSong.difficulty
+    if (difficulty) {
+      const notesKey = `${difficulty}Notes`
+      const notes = recentSong[notesKey]
+      if (notes && notes > 0) {
+        totalNotes.value = notes.toString()
+        // 自动填写Pure数量为物量
+        pureCount.value = notes.toString()
+      }
+    }
+    console.log('从 recent_song 加载歌曲:', recentSong.name)
+    return
+  }
+  
+  // 兼容旧的 storage 格式
   if (options && options.from === 'songDetail') {
     // 从歌曲详情页面跳转过来
     const selectedSongForTolerance = uni.getStorageSync('selected_song_for_tolerance')
-    if (selectedSongForTolerance && selectedSongForTolerance.song && selectedSongForTolerance.difficulty) {
-      const { song, difficulty } = selectedSongForTolerance
+    if (selectedSongForTolerance && selectedSongForTolerance.song) {
+      const song = selectedSongForTolerance.song
+      const difficulty = selectedSongForTolerance.difficulty || song.difficulty
       
       // 更新选中的歌曲信息
       selectedSong.value = {
         name: song.name,
         artist: song.artist,
         difficulty: difficulty,
-        constant: song[difficulty]
+        constant: song.constant || song[difficulty]
       }
       
       // 获取物量
       const notesKey = `${difficulty}Notes`
-      const notes = song[notesKey]
+      const notes = song[notesKey] || song.notes
       if (notes && notes > 0) {
         totalNotes.value = notes.toString()
-        
-        // 自动填写Pure数量为物量
         pureCount.value = notes.toString()
-        
         console.log(`从歌曲详情加载: ${song.name} [${difficulty.toUpperCase()}] 物量: ${notes}`)
       }
     }
   } else if (options && options.from === 'songs') {
     // 从歌曲列表直接点击难度跳转过来
     const selectedSongForTolerance = uni.getStorageSync('selected_song_for_tolerance')
-    if (selectedSongForTolerance && selectedSongForTolerance.song && selectedSongForTolerance.difficulty) {
-      const { song, difficulty } = selectedSongForTolerance
+    if (selectedSongForTolerance) {
+      // 处理新旧两种格式
+      const song = selectedSongForTolerance.song || selectedSongForTolerance
+      const difficulty = selectedSongForTolerance.difficulty || song.difficulty
       
       // 更新选中的歌曲信息
       selectedSong.value = {
         name: song.name,
         artist: song.artist,
         difficulty: difficulty,
-        constant: song[difficulty]
+        constant: song.constant || song[difficulty]
       }
       
       // 获取物量
       const notesKey = `${difficulty}Notes`
-      const notes = song[notesKey]
+      const notes = song[notesKey] || song.notes
       if (notes && notes > 0) {
         totalNotes.value = notes.toString()
-        
-        // 自动填写Pure数量为物量
         pureCount.value = notes.toString()
-        
         console.log(`从歌曲列表加载: ${song.name} [${difficulty.toUpperCase()}] 物量: ${notes}`)
       }
     }
@@ -765,12 +783,25 @@ onLoad((options: any) => {
 onPageShow(() => {
   // 检查是否有新选择的歌曲
   const recentSong = uni.getStorageSync('recent_song')
-  if (recentSong) {
+  if (recentSong && recentSong.name) {
     // 检查是否与当前选中的歌曲不同
     if (!selectedSong.value.name || 
         selectedSong.value.name !== recentSong.name || 
         selectedSong.value.difficulty !== recentSong.difficulty) {
       selectedSong.value = recentSong
+      
+      // 获取物量
+      const difficulty = recentSong.difficulty
+      if (difficulty) {
+        const notesKey = `${difficulty}Notes`
+        const notes = recentSong[notesKey]
+        if (notes && notes > 0) {
+          totalNotes.value = notes.toString()
+          // 自动填写Pure数量为物量
+          pureCount.value = notes.toString()
+        }
+      }
+      
       console.log('页面显示时更新了选中的歌曲:', recentSong)
     }
   }
