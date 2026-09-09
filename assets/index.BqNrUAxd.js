@@ -1,0 +1,1 @@
+import{af as a,ag as e,q as r}from"./index-BsyyMxx9.js";import"./tolerance-calculator.D9RShbe4.js";function s(s,t="navigateTo"){switch(t){case"navigateTo":r({url:s});break;case"redirectTo":e({url:s});break;case"switchTab":a({url:s})}}export{s as n};
